@@ -1,0 +1,184 @@
+импорт  java.time.LocalDate ;​​​​
+импорт  java.time.LocalDateTime ;​​​​
+импорт  java.time.format.DateTimeFormatter ;​​​​​​
+импорт  java.util.ArrayList ;​​​​
+импорт  java.util.List ;​​​​
+импортировать  Java . утилита . Сканер ;
+импорт  java.util.stream.Коллекторы ;​​​​​​
+
+// Класс Примечание
+ Примечание к классу {
+    частный  LocalDateTime  dateTime ;
+    личное  описание строки  ;
+
+    public  Note ( LocalDateTime  dateTime , String  description ) {
+        это . датаВремя = датаВремя ;
+        это . описание = описание ;
+    }
+
+    публичная  LocalDateTime  getDateTime () {
+        возврат  даты и времени ;
+    }
+
+    публичная  строка  getDescription () {
+        вернуть  описание ;
+    }
+
+    @ Переопределить
+    публичная  строка  toString () {
+        DateTimeFormatter  formatter = DateTimeFormatter . ofPattern ( "yyyy-MM-dd HH:mm" );
+        return  dateTime.format ( форматер ) + " - " + описание ;
+    }
+}
+
+        // Класс Блокнот
+        класс  Блокнот {
+            частный  Список < Примечание > заметки ;
+
+            публичный  блокнот () {
+                примечания = новый  ArrayList <>();
+            }
+
+            public  void  add ( Примечание примечание  ) {
+                примечания . добавить ( примечание );
+            }
+
+            публичный  список < Примечание > getNotesForDay ( LocalDate  дата ) {
+                возвратить  заметки . поток ()
+                        . фильтр ( примечание -> примечание . getDateTime (). toLocalDate (). isEqual ( дата ))
+                        . отсортировано (( n1 , n2 ) -> n1 . getDateTime (). compareTo ( n2 . getDateTime ()))
+                        . collect ( Коллекторы . toList ());
+            }
+
+            публичный  список < Примечание > getNotesForWeek ( LocalDate  startDate ) {
+                возвратить  заметки . поток ()
+                        . фильтр ( примечание -> ! примечание . getDateTime (). toLocalDate (). isBefore ( startDate ) &&
+                                ! примечание . getDateTime (). toLocalDate (). isAfter ( startDate . plusDays ( 6 )))
+                        . отсортировано (( n1 , n2 ) -> n1 . getDateTime (). compareTo ( n2 . getDateTime ()))
+                        . collect ( Коллекторы . toList ());
+            }
+
+            публичный  список < Примечание > getAllNotes () {
+                возвратить  заметки ;
+            }
+        }
+
+        // Интерфейс NotebookView
+        интерфейс  NotebookView {
+            void  displayNotes ( Список < Примечание > заметки );
+            void  showMessage ( Строковое  сообщение );
+            Примечание  getNoteInput ();
+        }
+
+        // Реализация ConsoleNotebookView
+        класс  ConsoleNotebookView  реализует  NotebookView {
+            частный  сканер  сканер ;
+
+            публичный  ConsoleNotebookView () {
+                сканер = новый  сканер ( система . в );
+            }
+
+            @ Переопределить
+            public  void  displayNotes ( Список < Примечание > заметки ) {
+                если ( примечания . isEmpty ()) {
+                    Система . вне . println ( "Нет записей." );
+                } еще {
+                    примечания . forEach ( System . out :: println );
+                }
+            }
+
+            @ Переопределить
+            public  void  showMessage ( Строковое  сообщение ) {
+                Система.out.println ( сообщение ) ;​​​
+            }
+
+            @ Переопределить
+            публичная  заметка  getNoteInput () {
+                Система . вне . print ( "Введите даты и время (гггг-ММ-дд ЧЧ:мм): " );
+                Строка  dateTimeInput = scanner . nextLine ();
+                Система . вне . print ( "Введите описание: " );
+                 Описание строки = scanner . nextLine ();
+
+                LocalDateTime  dateTime = LocalDateTime.parse ( dateTimeInput , DateTimeFormatter.ofPattern ( " yyyy - MM-dd HH:mm" ) ) ;
+                вернуть  новую  заметку ( dateTime , description );
+            }
+        }
+
+        // Класс NotebookPresenter
+        класс  NotebookPresenter {
+             Модель частного ноутбука  ;
+            частный  вид NotebookView  ;
+
+            public  NotebookPresenter ( модель Notebook  , представление NotebookView ) { 
+                эта . модель = модель ;
+                это . вид = вид ;
+            }
+
+            public  void  addNote () {
+                Примечание  примечание = вид . getNoteInput ();
+                модель . добавить ( примечание );
+                вид . showMessage ( "Запись добавлена." );
+            }
+
+            public  void  displayNotesForDay ( LocalDate  дата ) {
+                Список < Примечание > заметки = модель . getNotesForDay ( дата );
+                view.displayNotes ( примечания ) ;​
+            }
+
+            public  void  displayNotesForWeek ( LocalDate  startDate ) {
+                Список < Примечание > заметки = модель . getNotesForWeek ( startDate );
+                view.displayNotes ( примечания ) ;​
+            }
+
+            public  void  displayAllNotes () {
+                Список < Примечание > заметки = модель . getAllNotes ();
+                view.displayNotes ( примечания ) ;​
+            }
+        }
+
+        // Класс Main
+        публичный  класс  Main {
+            public  static  void  main ( String [] args ) {
+                 Блокнот блокнот = новый  Блокнот ();
+                 представление ConsoleNotebookView = new  ConsoleNotebookView ();
+                NotebookPresenter  докладчик = новый  NotebookPresenter ( блокнот , вид );
+
+                Сканер  сканер = новый  Сканер ( Система . в );
+
+                в то время как ( правда ) {
+                    Система . вне . println ( "Выберите действие:" );
+                    Система . вне . println ( "1. Добавить запись" );
+                    Система . вне . println ( "2. Показать записи за день" );
+                    Система . вне . println ( "3. Показать записи за неделю" );
+                    Система . вне . println ( "4. Показать все записи" );
+                    Система . вне . println ( "5. Выход" );
+                    int  выбор = сканер . nextInt ();
+                    сканер . следующаястрока (); // очистка буфера
+
+                    переключатель ( выбор ) {
+                        случай  1 :
+                            ведущий . addNote ();
+                            перерыв ;
+                        случай  2 :
+                            Система . вне . print ( "Введите данные (гггг-ММ-дд): " );
+                            LocalDate  дата = LocalDate.parse ( scanner.nextLine ( ) ) ;​
+                            презентатор.displayNotesForDay ( дата ) ;​
+                            перерыв ;
+                        случай  3 :
+                            Система . вне . print ( "Введите начальную (гггг-ММ-дд):" );
+                            LocalDate  startDate = LocalDate.parse ( scanner.nextLine ( ) ) ;​
+                            презентатор.displayNotesForWeek ( startDate ) ;​
+                            перерыв ;
+                        случай  4 :
+                            ведущий . displayAllNotes ();
+                            перерыв ;
+                        случай  5 :
+                            Система . вне . println ( "Выход из приложения." );
+                            сканер . закрыть ();
+                            возвращаться ;
+                        по умолчанию :
+                            Система . вне . println ( "Неверный выбор. Пожалуйста, изобразите снова." );
+                    }
+                }
+            }
+        }
